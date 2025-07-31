@@ -1,0 +1,27 @@
+.user-home {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.home-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.home-formGroup {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+.home-button {
+  margin-top: 20px;
+  background-color: #2e7d32;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: bold;
+}

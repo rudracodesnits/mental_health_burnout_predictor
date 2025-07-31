@@ -1,0 +1,97 @@
+.auth-wrapper {
+  height: 100vh;
+  background: linear-gradient(to right, #156f9c, #cdd2cf);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.auth-form {
+  background: white;
+  padding: 2rem;
+  width: 350px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.auth-form h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  background: #eee;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 0.6rem;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.auth-tab.active {
+  background: linear-gradient(to right, #babcdd, #2c31ad);
+  color: white;
+}
+
+.auth-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.auth-form input {
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.forgot-link {
+  text-align: right;
+  display: block;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  color: #086036;
+  text-decoration: none;
+}
+
+.submit-btn {
+  padding: 0.7rem;
+  border: none;
+  border-radius: 5px;
+  background: linear-gradient(to right, #44617e, #0c90b9);
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-btn:hover {
+  opacity: 0.9;
+}
+
+.auth-footer {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.footer-link {
+  color: #030d01;
+  font-weight: 600;
+  cursor: pointer;
+}
