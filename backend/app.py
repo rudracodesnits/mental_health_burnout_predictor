@@ -1,10 +1,16 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from dotenv import load_dotenv
 import joblib
 import pandas as pd
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+# In production, allow FRONTEND_URL. In dev, allow all (*)
+frontend_url = os.environ.get('FRONTEND_URL', '*')
+CORS(app, resources={r"/predict": {"origins": frontend_url}})
 
 # Load the pre-trained models
 try:

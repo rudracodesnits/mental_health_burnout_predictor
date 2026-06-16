@@ -1,96 +1,170 @@
-import React, { useState } from 'react';
-import '../styles/Home.css'; // Make sure this path is correct
+// src/pages/DashBoard.jsx
+// Analytics dashboard for authenticated users.
+// Shows history trend from localStorage and at-a-glance stats.
+// All data comes from existing localStorage 'burnoutResults' key — no backend changes.
 
-const Home = () => {
-  const [formData, setFormData] = useState({
-    stress: 0.5,
-    depression: 0.5,
-    anxiety: 0.5,
-    sleep: 0.5,
-    activity: 0.5,
-    diet: 0.5,
-  });
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import ResultCard from '../components/ResultCard';
+import { useUser } from '@clerk/clerk-react';
+import './DashBoard.css';
 
-  const [predictionResult, setPredictionResult] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+const LEVEL_COLORS = {
+  Low:    'var(--color-success)',
+  Medium: 'var(--color-warning)',
+  High:   'var(--color-danger)',
+};
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: parseFloat(e.target.value),
-    });
-  };
+const LEVEL_ICONS = {
+  Low:    '🟢',
+  Medium: '🟡',
+  High:   '🔴',
+};
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setPredictionResult(null);
+const StatCard = ({ title, value, subtitle, color }) => (
+  <div className="stat-card glass">
+    <p className="stat-card__title">{title}</p>
+    <p className="stat-card__value" style={{ color }}>{value}</p>
+    {subtitle && <p className="stat-card__subtitle">{subtitle}</p>}
+  </div>
+);
 
-    try {
-      const API_URL = "http://127.0.0.1:5000/predict";
+const DashBoard = () => {
+  const { user } = useUser();
+  const [history, setHistory] = useState([]);
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData),
-      });
-      
-      if(!response.ok){
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      console.log("Prediction done:", result);
-      setPredictionResult(result);
-    } catch(err) {
-      console.error("Submission error:", err);
-      setError('Failed to get prediction, backend down');
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    const stored = localStorage.getItem('burnoutResults');
+    if (stored) {
+      try { setHistory(JSON.parse(stored)); } catch { /* ignore */ }
     }
-  };
+  }, []);
+
+  const latestResult = history[0] || null;
+
+  const avgScore = history.length > 0
+    ? (history.reduce((sum, r) => sum + r.score, 0) / history.length).toFixed(4)
+    : null;
+
+  const dominantLevel = history.length > 0
+    ? (['Low', 'Medium', 'High'].reduce((max, level) => {
+        const count = history.filter(r => r.level === level).length;
+        const maxCount = history.filter(r => r.level === max).length;
+        return count > maxCount ? level : max;
+      }, 'Low'))
+    : null;
 
   return (
-      <div>
-      <form onSubmit={handleSubmit}>
-        {/* Example for one slider */}
-        <label>
-          Stress Level: {formData.stress}
-          <input
-            type="range"
-            name="stress"
-            min="0"
-            max="1"
-            step="0.01"
-            value={formData.stress}
-            onChange={handleChange}
-          />
-        </label>
-        {/* ... add other sliders for depression, anxiety, etc. ... */}
-        
-        <br />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Predicting...' : 'Predict Burnout'}
-        </button>
-      </form>
-
-      {/* Display the prediction results */}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      
-      {predictionResult && (
-        <div>
-          <h3>Prediction Results:</h3>
-          <p>Predicted Burnout Level: <strong>{predictionResult.predicted_level}</strong></p>
-          <p>Predicted Burnout Score: <strong>{predictionResult.predicted_score}</strong></p>
+    <div className="dashboard">
+      <div className="container">
+        {/* Header */}
+        <div className="dashboard__header">
+          <div>
+            <h1 className="dashboard__title">Dashboard</h1>
+            <p className="dashboard__subtitle">
+              {user?.firstName ? `${user.firstName}'s` : 'Your'} wellbeing overview
+            </p>
+          </div>
+          <Link to="/userhome" className="btn btn--primary btn--md">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+              <polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            New Assessment
+          </Link>
         </div>
-      )}
+
+        {history.length === 0 ? (
+          /* Empty state */
+          <div className="dashboard__empty glass animate-fade-in">
+            <div className="dashboard__empty-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <h2>No assessments yet</h2>
+            <p>Run your first burnout assessment to see your data here.</p>
+            <Link to="/userhome" className="btn btn--primary btn--md">
+              Run Assessment
+            </Link>
+          </div>
+        ) : (
+          <div className="dashboard__body animate-fade-in">
+            {/* Stats row */}
+            <div className="dashboard__stats">
+              <StatCard
+                title="Assessments Taken"
+                value={history.length}
+                subtitle="Saved locally"
+                color="var(--color-primary-light)"
+              />
+              <StatCard
+                title="Average Score"
+                value={avgScore || '—'}
+                subtitle="Across all sessions"
+                color={latestResult ? LEVEL_COLORS[dominantLevel] : undefined}
+              />
+              <StatCard
+                title="Most Common Level"
+                value={dominantLevel ? `${LEVEL_ICONS[dominantLevel]} ${dominantLevel}` : '—'}
+                subtitle="Across sessions"
+                color={LEVEL_COLORS[dominantLevel]}
+              />
+            </div>
+
+            {/* Two-column: latest result + history */}
+            <div className="dashboard__panels">
+              {/* Latest result */}
+              <section aria-labelledby="latest-heading">
+                <h2 id="latest-heading" className="dashboard__panel-title">
+                  Latest Result
+                </h2>
+                {latestResult ? (
+                  <ResultCard
+                    result={{
+                      predicted_level: latestResult.level,
+                      predicted_score: latestResult.score,
+                    }}
+                    animate={false}
+                  />
+                ) : (
+                  <p className="dashboard__no-data">No results yet.</p>
+                )}
+              </section>
+
+              {/* Full history */}
+              <section aria-labelledby="history-heading">
+                <h2 id="history-heading" className="dashboard__panel-title">
+                  Assessment History
+                </h2>
+                <div className="dashboard__history" role="list">
+                  {history.map((entry, i) => (
+                    <div key={i} className="dashboard__history-item glass" role="listitem">
+                      <div className="dashboard__history-rank">#{i + 1}</div>
+                      <div className="dashboard__history-info">
+                        <span className="dashboard__history-time">{entry.timestamp}</span>
+                        <span
+                          className="dashboard__history-level"
+                          style={{ color: LEVEL_COLORS[entry.level] }}
+                        >
+                          {LEVEL_ICONS[entry.level]} {entry.level}
+                        </span>
+                      </div>
+                      <div
+                        className="dashboard__history-score"
+                        style={{ color: LEVEL_COLORS[entry.level] }}
+                      >
+                        {entry.score}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default Home;
+export default DashBoard;

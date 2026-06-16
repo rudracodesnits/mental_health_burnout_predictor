@@ -1,0 +1,100 @@
+.result-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.result-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.result-card__icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xl);
+  background: rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.result-card__label {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  font-weight: var(--weight-medium);
+  margin-bottom: var(--space-1);
+}
+
+.result-card__level {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+
+/* --- Score Bar --- */
+.score-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.score-bar__labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  font-weight: var(--weight-medium);
+}
+
+.score-bar__track {
+  position: relative;
+  height: 8px;
+  background: var(--color-surface-overlay);
+  border-radius: var(--radius-full);
+  overflow: visible;
+}
+
+.score-bar__fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-bar__thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  transition: left 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-bar__percentage {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.score-bar__percent-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-normal);
+  color: var(--color-text-tertiary);
+}
+
+.result-card__message {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}

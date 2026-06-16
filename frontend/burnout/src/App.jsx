@@ -1,14 +1,18 @@
 // src/App.jsx
-import React from 'react';
+import React, { lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { UserFlowProvider, useUserFlow } from './context/UserFlowContext';
 import { useUser } from '@clerk/clerk-react';
 import Navbar from './components/NavBar';
-import Profile from './pages/Profile';
-import AuthForm from './components/Authform';
-import Home from './pages/Home';
-import BurnoutPredictor from './pages/BurnoutPredict';
-import UserHome from './pages/UserHome'; // Import UserHome
+
+// Lazy-load all pages for code splitting + better TTI
+const Home          = lazy(() => import('./pages/Home'));
+const AuthForm      = lazy(() => import('./components/Authform'));
+const UserHome      = lazy(() => import('./pages/UserHome'));
+const BurnoutPredictor = lazy(() => import('./pages/BurnoutPredict'));
+const Profile       = lazy(() => import('./pages/Profile'));
+const DashBoard     = lazy(() => import('./pages/DashBoard'));
+const AdminPage     = lazy(() => import('./pages/AdminPage'));
 
 const AppLayout = ({ children }) => {
   const { hasProceeded } = useUserFlow();
@@ -17,7 +21,9 @@ const AppLayout = ({ children }) => {
   return (
     <>
       {(hasProceeded || isSignedIn) && <Navbar />}
-      {children}
+      <main id="main-content" className="page-wrapper">
+        {children}
+      </main>
     </>
   );
 };
@@ -27,21 +33,31 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Public home page */}
+      {/* Public landing page */}
       <Route path="/" element={<Home />} />
 
       {/* Auth form */}
       <Route path="/auth" element={<AuthForm />} />
 
-      {/* User homepage - only for signed in users */}
+      {/* Authenticated routes */}
       <Route
         path="/userhome"
         element={isSignedIn ? <UserHome /> : <Navigate to="/" replace />}
       />
+      <Route
+        path="/dashboard"
+        element={isSignedIn ? <DashBoard /> : <Navigate to="/" replace />}
+      />
 
-      {/* Optional other routes */}
+      {/* Public routes */}
       <Route path="/profile" element={<Profile />} />
       <Route path="/predictor" element={<BurnoutPredictor />} />
+
+      {/* Admin — PIN-gated, no auth required from Clerk */}
+      <Route path="/admin" element={<AdminPage />} />
+
+      {/* Catch-all */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };
