@@ -2,6 +2,9 @@
 // Centralized API client — reads backend URL from env variable.
 // Also acts as a telemetry recorder — every prediction is logged
 // to localStorage 'wc-admin-log' for the admin analytics dashboard.
+console.log("ENV:", import.meta.env);
+console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
+console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://127.0.0.1:5000';
 
@@ -18,8 +21,8 @@ const SESSION_ID = (() => {
 /** Append a prediction record to the admin log (max 500 entries). */
 function recordAdminLog(entry) {
   try {
-    const raw  = localStorage.getItem('wc-admin-log');
-    const log  = raw ? JSON.parse(raw) : [];
+    const raw = localStorage.getItem('wc-admin-log');
+    const log = raw ? JSON.parse(raw) : [];
     log.unshift(entry);                      // newest first
     localStorage.setItem('wc-admin-log', JSON.stringify(log.slice(0, 500)));
   } catch {
@@ -46,17 +49,17 @@ export async function predictBurnout(formData, meta = {}) {
     const text = await response.text();
     // Log failed attempts too
     recordAdminLog({
-      id:        `${SESSION_ID}_${startedAt}`,
+      id: `${SESSION_ID}_${startedAt}`,
       sessionId: SESSION_ID,
       timestamp: new Date().toISOString(),
       durationMs: Date.now() - startedAt,
-      status:    'error',
+      status: 'error',
       httpStatus: response.status,
-      mode:      meta.mode || 'guest',
+      mode: meta.mode || 'guest',
       userEmail: meta.userEmail || null,
-      userName:  meta.userName  || null,
-      inputs:    formData,
-      result:    null,
+      userName: meta.userName || null,
+      inputs: formData,
+      result: null,
     });
     throw new Error(`Prediction failed (${response.status}): ${text}`);
   }
@@ -65,16 +68,16 @@ export async function predictBurnout(formData, meta = {}) {
 
   // Record successful prediction
   recordAdminLog({
-    id:         `${SESSION_ID}_${startedAt}`,
-    sessionId:  SESSION_ID,
-    timestamp:  new Date().toISOString(),
+    id: `${SESSION_ID}_${startedAt}`,
+    sessionId: SESSION_ID,
+    timestamp: new Date().toISOString(),
     durationMs: Date.now() - startedAt,
-    status:     'success',
+    status: 'success',
     httpStatus: 200,
-    mode:       meta.mode || 'guest',
-    userEmail:  meta.userEmail || null,
-    userName:   meta.userName  || null,
-    inputs:     formData,
+    mode: meta.mode || 'guest',
+    userEmail: meta.userEmail || null,
+    userName: meta.userName || null,
+    inputs: formData,
     result: {
       level: result.predicted_level,
       score: result.predicted_score,
